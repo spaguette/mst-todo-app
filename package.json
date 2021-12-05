@@ -1,5 +1,5 @@
 {
-  "name": "mobx-template",
+  "name": "mst-todo-app",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -10,11 +10,16 @@
     "@types/node": "^12.20.34",
     "@types/react": "^17.0.31",
     "@types/react-dom": "^17.0.10",
+    "mobx": "^6.3.5",
+    "mobx-react-lite": "^3.2.1",
+    "mobx-state-tree": "^5.0.5",
+    "nanoid": "^3.1.30",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-scripts": "4.0.3",
-    "typescript": "^4.4.4",
-    "web-vitals": "^1.1.2"
+    "typescript": "^4.5.2",
+    "web-vitals": "^1.1.2",
+    "yup": "^0.32.11"
   },
   "scripts": {
     "start": "react-scripts start",
