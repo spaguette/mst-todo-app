@@ -7,12 +7,9 @@ import {
   SnapshotIn,
 } from "mobx-state-tree";
 import { nanoid } from "nanoid";
-import {
-  deleteTodoAPI,
-  fetchTodosAPI,
-  putTodoAPI,
-  addTodoAPI,
-} from "../api/todos";
+import { TodoAPI } from "../api/todos";
+
+const todoApi = new TodoAPI();
 
 const TodoModel = types.model({
   id: types.identifier,
@@ -25,7 +22,7 @@ export const Todo = TodoModel.actions((self) => ({
   toggle: flow(function* toggle() {
     self.done = !self.done;
     try {
-      yield* toGenerator(putTodoAPI(self));
+      yield* toGenerator(todoApi.put(self));
     } catch (e) {
       console.error(e);
     }
@@ -36,9 +33,8 @@ export interface ITodo extends Instance<typeof Todo> {}
 const TodoStore = types
   .model({
     todos: types.map(Todo),
-    state: types.optional(
-      types.enumeration("State", ["idle", "loading", "error", "success"]),
-      "idle"
+    state: types.maybe(
+      types.enumeration("State", ["loading", "error", "success"])
     ),
   })
   .actions((self) => ({
@@ -48,7 +44,7 @@ const TodoStore = types
       const newTodo = Todo.create({ id, text });
       self.todos.put(newTodo);
       try {
-        const serverTodo = yield* toGenerator(addTodoAPI(newTodo));
+        const serverTodo = yield* toGenerator(todoApi.add(newTodo));
         // After the server created the new todo, exchange the optimistically created one
         // with the server Todo
         self.todos.delete(newTodo.id);
@@ -61,7 +57,7 @@ const TodoStore = types
     removeTodo: flow(function* removeTodo(todoId: string) {
       self.todos.delete(todoId);
       try {
-        yield* toGenerator(deleteTodoAPI(todoId));
+        yield* toGenerator(todoApi.delete(todoId));
       } catch (e) {
         console.error(e);
       }
@@ -70,16 +66,13 @@ const TodoStore = types
     fetchTodos: flow(function* fetchTodos() {
       self.state = "loading";
       try {
-        const todosArr = yield* toGenerator(fetchTodosAPI());
-        todosArr.forEach((todo) => {
-          self.todos.put(todo);
-        });
+        const todosArr = yield* toGenerator(todoApi.fetchAll());
+        todosArr.forEach((todo) => self.todos.put(todo));
         self.state = "success";
       } catch (e) {
         console.error(e);
         self.state = "error";
       }
-      return self.todos;
     }),
   }))
   .views((self) => ({

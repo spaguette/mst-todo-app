@@ -31,7 +31,7 @@ export const useFetchTodosQuery = (): TodosFetchResult => {
   const store = useTodoStore();
 
   useEffect(() => {
-    if (store.state === "idle") {
+    if (!store.state) {
       store.fetchTodos();
     }
   }, [store]);
